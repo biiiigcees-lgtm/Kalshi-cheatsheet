@@ -5,6 +5,7 @@ import requests
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from sklearn.ensemble import RandomForestRegressor
@@ -15,12 +16,34 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("btc-ai")
 
-app = FastAPI()
-
 # Configuration
 COINGECKO_API_URL = "https://api.coingecko.com/api/v3"
 MODEL_PATH = "model.pkl"
 SCALER_PATH = "scaler.pkl"
+PORT = int(os.getenv("PORT", 8080))
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup/shutdown events"""
+    # Startup
+    model, scaler = load_model()
+    
+    if model is None:
+        logger.info("No model.pkl found — auto-training now...")
+        try:
+            df = fetch_btc_data(days=30)
+            train_model(df)
+        except Exception as e:
+            logger.error(f"Auto-train failed: {e}")
+    else:
+        logger.info("Model loaded successfully")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Application shutting down")
+
+app = FastAPI(lifespan=lifespan)
 
 class PredictionRequest(BaseModel):
     hours: int = 24
@@ -175,21 +198,6 @@ def predict_price(model, scaler, df, feature_cols, hours=24):
         logger.error(f"Prediction failed: {e}")
         raise
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize model on startup"""
-    model, scaler = load_model()
-    
-    if model is None:
-        logger.info("No model.pkl found — auto-training now...")
-        try:
-            df = fetch_btc_data(days=30)
-            train_model(df)
-        except Exception as e:
-            logger.error(f"Auto-train failed: {e}")
-    else:
-        logger.info("Model loaded successfully")
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -246,4 +254,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
