@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bb-bg:     #000000;
+  --bb-panel:  #080808;
+  --bb-border: #1c1c1c;
+  --bb-amber:  #ff8c00;
+  --bb-green:  #00d26a;
+  --bb-red:    #ff3b3b;
+  --bb-yellow: #ffd700;
+  --bb-blue:   #4a9eff;
+  --bb-dim:    #4a4a4a;
+  --bb-muted:  #888888;
+  --bb-text:   #cccccc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bb-bg);
+  color: var(--bb-text);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin scrollbars */
+::-webkit-scrollbar          { width: 4px; height: 4px; }
+::-webkit-scrollbar-track    { background: #000; }
+::-webkit-scrollbar-thumb    { background: #2a2a2a; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+
+/* Selection */
+::selection { background: #ff8c0033; }
+
+/* Utility: separator line */
+.bb-rule { border-top: 1px solid var(--bb-border); }
+
+/* Utility: panel */
+.bb-panel {
+  background: var(--bb-panel);
+  border: 1px solid var(--bb-border);
+}
+
+/* Utility: section label */
+.bb-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bb-muted);
+}
+
+/* Utility: big number */
+.bb-num {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--bb-amber);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Utility: stat value */
+.bb-val {
+  font-weight: 600;
+  color: var(--bb-amber);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cursor blink */
+.bb-cursor::after {
+  content: '▊';
+  animation: blink 1s step-end infinite;
+  color: var(--bb-amber);
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
